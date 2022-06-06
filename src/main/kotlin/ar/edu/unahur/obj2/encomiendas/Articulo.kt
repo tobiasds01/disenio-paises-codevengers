@@ -9,6 +9,4 @@ class Articulo(
     val alto: Float,
     val esPeligroso: Boolean,
     val destino: Sucursal
-) {
-
-}
+)

@@ -5,6 +5,7 @@ import kotlin.math.*
 class Sucursal(val zona: Zona, val volumenDelDeposito: Int) {
     val posicion: MutableList<Int> = mutableListOf()
     val transportes: MutableSet<Transporte> = mutableSetOf()
+    val enviosRegistrados: MutableList<Envio> = mutableListOf()
     val articulosEnDeposito: MutableList<Articulo> = mutableListOf()
     val articulosEnViaje: MutableList<Articulo> = mutableListOf()
 
@@ -23,14 +24,24 @@ class Sucursal(val zona: Zona, val volumenDelDeposito: Int) {
         return (distancia * 1000.0).toInt() / 1000.0
     }
 
-    fun transporteApto(articulos: List<Articulo>): Transporte? {
-        return transportes.find { (it.pesoMaximo) > (it.carga.sumBy { article -> article.peso }) &&
-                                it.volumen > (it.carga.sumBy { article -> article.volumen } * 1.05) &&
-                                articulos.all { article -> it.coincideDestino(article) } }
+    fun transporteApto(envio: Envio): Transporte? {
+        return transportes.find { GestorEncomiendas.esTransporteApto(envio, it) }
     }
 
     fun hayEspacio(articulos: List<Articulo>): Boolean {
         return (volumenDelDeposito - articulosEnDeposito.sumOf { it.volumen } - articulosEnViaje.sumOf { it.volumen }) > articulos.sumOf { it.volumen }
+    }
+
+    fun listaDeTransportesAptos(envio: Envio): List<Transporte> {
+        return transportes.filter { GestorEncomiendas.esTransporteApto(envio, it) }
+    }
+
+    fun designarTransporte(envio: Envio) {
+        try {
+            listaDeTransportesAptos(envio).minByOrNull{ GestorEncomiendas.precioDelEnvio(envio, it) }?.sumarEnvio(envio)
+        } catch (ex: Exception) {
+            "No hay transportes disponibles para realizar ese pedido."
+        }
     }
 }
 
