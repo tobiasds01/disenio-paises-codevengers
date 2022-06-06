@@ -7,4 +7,5 @@ class Envio(val cliente: Cliente, val articulos: List<Articulo>, val sucursalOri
     fun puedeRealizarse(): Boolean {
         return (transporte != null) && sucursalDestino.hayEspacio(articulos)
     }
+    fun peso() = articulos.sumBy { it.peso }
 }
