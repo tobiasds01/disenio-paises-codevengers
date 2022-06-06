@@ -5,11 +5,11 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 
 class EnvioDesc: DescribeSpec({
-    val williamsMorris: Sucursal = Sucursal(Continental)
+    val williamsMorris: Sucursal = Sucursal(Continental, 3000)
     williamsMorris.definirPosicion(34, 58)
-    val rosario: Sucursal = Sucursal(Continental)
+    val rosario: Sucursal = Sucursal(Continental, 8000)
     rosario.definirPosicion(32, 60)
-    val baseMarambio: Sucursal = Sucursal(Insular)
+    val baseMarambio: Sucursal = Sucursal(Insular, 5000)
     baseMarambio.definirPosicion(64, 56)
 
 
