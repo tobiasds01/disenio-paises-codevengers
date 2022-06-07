@@ -4,10 +4,19 @@ import kotlin.math.*
 
 class Sucursal(val zona: Zona, val volumenDelDeposito: Int) {
     val posicion: MutableList<Int> = mutableListOf()
-    val transportes: MutableSet<Transporte> = mutableSetOf()
+    val transportes = mutableListOf<Transporte>()
     val enviosRegistrados: MutableList<Envio> = mutableListOf()
     val articulosEnDeposito: MutableList<Articulo> = mutableListOf()
     val articulosEnViaje: MutableList<Articulo> = mutableListOf()
+
+
+    fun agregarTransporte(transporte: Transporte){
+        if(transportes.contains(transporte)){
+            Error("ya tiene ese transporte")
+        }
+        else{transportes.add(transporte)}
+    }
+
 
     fun definirPosicion(x: Int, y: Int) {
         posicion.add(x)
@@ -25,7 +34,7 @@ class Sucursal(val zona: Zona, val volumenDelDeposito: Int) {
     }
 
     fun transporteApto(envio: Envio): Transporte? {
-        return transportes.find { GestorEncomiendas.esTransporteApto(envio, it) }
+        return transportes.find { it.esTransporteApto(envio) }
     }
 
     fun hayEspacio(articulos: List<Articulo>): Boolean {
@@ -33,7 +42,7 @@ class Sucursal(val zona: Zona, val volumenDelDeposito: Int) {
     }
 
     fun listaDeTransportesAptos(envio: Envio): List<Transporte> {
-        return transportes.filter { GestorEncomiendas.esTransporteApto(envio, it) }
+        return transportes.filter { it.esTransporteApto(envio) }
     }
 
     fun designarTransporte(envio: Envio) {

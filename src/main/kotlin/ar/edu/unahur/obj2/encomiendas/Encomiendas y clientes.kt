@@ -23,21 +23,8 @@ object GestorEncomiendas {
         return (envio.sucursalOrigen.distanciaTierra(envio.sucursalDestino) / transporte.velocidadPromedio).roundToInt()
     }
 
-    fun esTransporteApto(envio: Envio, transporte: Transporte): Boolean {
-        return tieneCapacidadFisica(envio, transporte) && esEnvioCoherente(envio, transporte)
-    }
 
-    fun tieneCapacidadFisica(envio: Envio, transporte: Transporte): Boolean {
-        val puedeLlevarArticulosPeligrosos = if (envio.articulos.any { it.esPeligroso }) transporte.maximoDeArticulosPeligrosos(envio) else true
-        return (puedeLlevarArticulosPeligrosos &&
-                (transporte.pesoMaximo) > (transporte.carga.sumBy { article -> article.peso }) &&
-                transporte.volumen > (transporte.carga.sumBy { article -> article.volumen } * 1.05))
-    }
 
-    fun esEnvioCoherente(envio: Envio, transporte: Transporte): Boolean {
-        val coincidenRegiones = if (envio.sucursalOrigen.zona == envio.sucursalDestino.zona) envio.sucursalOrigen.zona == transporte.tipoDesplazamiento else false
-        return coincidenRegiones && envio.articulos.all { article -> transporte.coincideDestino(article) }
-    }
 
     fun registrarEnvio(envio: Envio) {
         envio.sucursalOrigen.enviosRegistrados.add(envio)

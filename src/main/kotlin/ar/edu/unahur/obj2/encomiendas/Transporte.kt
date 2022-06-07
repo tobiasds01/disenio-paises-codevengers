@@ -10,6 +10,31 @@ abstract class Transporte() {
     val enviosDesignados: MutableList<Envio> = mutableListOf()
     val carga: MutableList<Articulo> = mutableListOf()
 
+    fun tieneCapacidadFisica(envio: Envio): Boolean {
+        val puedeLlevarArticulosPeligrosos = if (envio.articulos.any { it.esPeligroso }) this.maximoDeArticulosPeligrosos(envio) else true
+        return (puedeLlevarArticulosPeligrosos &&
+                (this.pesoMaximo) > (this.carga.sumBy { article -> article.peso }) &&
+                this.volumen > (this.carga.sumBy { article -> article.volumen } * 1.05))
+    }
+
+    fun esEnvioCoherente(envio: Envio): Boolean {
+        val coincidenRegiones = if (envio.sucursalOrigen.zona == envio.sucursalDestino.zona) envio.sucursalOrigen.zona == this.tipoDesplazamiento else false
+        return coincidenRegiones && envio.articulos.all { article -> this.coincideDestino(article) }
+    }
+
+    fun esTransporteApto(envio: Envio): Boolean {
+        return this.tieneCapacidadFisica(envio) && this.esEnvioCoherente(envio)
+    }
+
+
+
+    fun cargar(envio: Envio){
+        if(this.esTransporteApto(envio)){
+            enviosDesignados.add(envio)
+        }
+        else{Error("NO PUEDE CARGAR ESE ENVIO EN EL TRANSPORTE")}
+    }
+
     abstract fun precioKm(envio: Envio) : Int
 
     abstract fun maximoDeArticulosPeligrosos(envio: Envio): Boolean

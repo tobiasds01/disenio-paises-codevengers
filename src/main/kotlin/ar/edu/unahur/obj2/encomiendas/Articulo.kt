@@ -4,9 +4,9 @@ class Articulo(
     val nombre: String,
     val peso: Int,
     val volumen: Int,
-    val largo: Float,
-    val ancho: Float,
-    val alto: Float,
+    val largo: Double,
+    val ancho: Double,
+    val alto:  Double,
     val esPeligroso: Boolean,
     val destino: Sucursal
 )
