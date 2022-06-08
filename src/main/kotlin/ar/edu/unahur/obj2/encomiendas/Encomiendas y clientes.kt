@@ -2,10 +2,10 @@ package ar.edu.unahur.obj2.encomiendas
 
 import kotlin.math.roundToInt
 
-class Cliente(val nombre: String, val dni: Int) {
-}
+class Cliente(val nombre: String, val dni: Int)
 
 object GestorEncomiendas {
+
     fun distanciaDelEnvio(envio: Envio): Double {
         return if (envio.sucursalOrigen.zona == envio.sucursalDestino.zona) {
             envio.sucursalOrigen.distanciaTierra(envio.sucursalDestino)
@@ -15,7 +15,7 @@ object GestorEncomiendas {
     }
 
     fun precioDelEnvio(envio: Envio, transporte: Transporte): Double {
-        var precio = distanciaDelEnvio(envio) * transporte.precioKm(envio)
+        val precio = distanciaDelEnvio(envio) * transporte.precioKm(envio)
         return if (envio.tipoDeEncomienda == EncomiendaEstandar) precio else precio * 1.5
     }
 
@@ -23,12 +23,8 @@ object GestorEncomiendas {
         return (envio.sucursalOrigen.distanciaTierra(envio.sucursalDestino) / transporte.velocidadPromedio).roundToInt()
     }
 
-
-
-
     fun registrarEnvio(envio: Envio) {
         envio.sucursalOrigen.enviosRegistrados.add(envio)
-
     }
 }
 

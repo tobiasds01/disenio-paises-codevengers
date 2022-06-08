@@ -12,7 +12,7 @@ class Sucursal(val zona: Zona, val volumenDelDeposito: Int) {
 
     fun agregarTransporte(transporte: Transporte){
         if(transportes.contains(transporte)){
-            Error("ya tiene ese transporte")
+            throw Exception("YA TIENE ESE TRANSPORTE")
         }
         else{transportes.add(transporte)}
     }
@@ -49,19 +49,13 @@ class Sucursal(val zona: Zona, val volumenDelDeposito: Int) {
         try {
             listaDeTransportesAptos(envio).minByOrNull{ GestorEncomiendas.precioDelEnvio(envio, it) }?.sumarEnvio(envio)
         } catch (ex: Exception) {
-            "No hay transportes disponibles para realizar ese pedido."
+            throw Exception("NO HAY TRANSPORTES DISPONIBLES PARA REALIZAR ESE ENVIO.")
         }
     }
 }
 
-interface Zona {
-}
+interface Zona
 
-object Continental: Zona {
-}
-
-object Insular: Zona {
-}
-object Regional : Zona{
-
-}
+object Continental: Zona
+object Insular: Zona
+object Regional : Zona

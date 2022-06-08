@@ -1,6 +1,6 @@
 package ar.edu.unahur.obj2.encomiendas
 
-abstract class Transporte() {
+abstract class Transporte {
     abstract val pesoMaximo: Int
     abstract val volumen: Int
     abstract val llevaArticulosPeligroso : Boolean
@@ -10,9 +10,15 @@ abstract class Transporte() {
     val enviosDesignados: MutableList<Envio> = mutableListOf()
     val carga: MutableList<Articulo> = mutableListOf()
 
+    abstract fun precioKm(envio: Envio) : Int
+
+    abstract fun maximoDeArticulosPeligrosos(envio: Envio): Boolean
+
+    open fun viajeMaximo() = 0
+
     fun tieneCapacidadFisica(envio: Envio): Boolean {
         val puedeLlevarArticulosPeligrosos = if (envio.articulos.any { it.esPeligroso }) this.maximoDeArticulosPeligrosos(envio) else true
-        return (puedeLlevarArticulosPeligrosos &&
+        return (puedeLlevarArticulosPeligrosos && this.comprobarViajeMaximo(envio) &&
                 (this.pesoMaximo) > (this.carga.sumBy { article -> article.peso }) &&
                 this.volumen > (this.carga.sumBy { article -> article.volumen } * 1.05))
     }
@@ -20,7 +26,6 @@ abstract class Transporte() {
     fun sirvePara(envio: Envio) = this.tipoDesplazamiento == envio.sucursalDestino.zona || this.tipoDesplazamiento == Regional
 
     fun esEnvioCoherente(envio: Envio): Boolean {
-
         return this.sirvePara(envio) && envio.articulos.all { article -> this.coincideDestino(article) }
     }
 
@@ -28,18 +33,14 @@ abstract class Transporte() {
         return this.tieneCapacidadFisica(envio) && this.esEnvioCoherente(envio)
     }
 
-
-
     fun cargar(envio: Envio){
         if(this.esTransporteApto(envio)){
             enviosDesignados.add(envio)
         }
-        else{Error("NO PUEDE CARGAR ESE ENVIO EN EL TRANSPORTE")}
+        else{
+            throw Exception("NO PUEDE CARGAR ESE ENVIO EN EL TRANSPORTE")
+        }
     }
-
-    abstract fun precioKm(envio: Envio) : Int
-
-    abstract fun maximoDeArticulosPeligrosos(envio: Envio): Boolean
 
     fun sumarKilometraje(metros: Int) { kilometraje += metros }
 
@@ -52,6 +53,10 @@ abstract class Transporte() {
         //la persona que retirará el envío en la sucursal destino.
         enviosDesignados.add(envio)
         envio.articulos.forEach { carga.add(it) }
+    }
+
+    fun comprobarViajeMaximo(envio: Envio): Boolean {
+        return if (this.viajeMaximo() != 0) {this.viajeMaximo() >= GestorEncomiendas.distanciaDelEnvio(envio)} else {true}
     }
 }
 
@@ -74,24 +79,16 @@ class Moto(override val pesoMaximo: Int): Transporte() {
     override val velocidadPromedio = 110
     override val tipoDesplazamiento = Continental
 
-    fun viajeMaximo() = 400
+    override fun viajeMaximo() = 400
 
     override fun maximoDeArticulosPeligrosos(envio: Envio): Boolean = false
 
     override fun precioKm(envio: Envio): Int{
-        var total = 0
-        if (envio.peso() * 80 > 500){
-            total = envio.peso() * 80
-        }
-        else {total = 500}
-
-        return total
+        return if (envio.peso() * 80 > 500) envio.peso() * 80 else 500
     }
-
-
 }
 
-class Avion(): Transporte() {
+class Avion: Transporte() {
     override val pesoMaximo = 10000
     override val volumen = 5000
     override val llevaArticulosPeligroso = true
@@ -99,7 +96,7 @@ class Avion(): Transporte() {
     override val tipoDesplazamiento = Regional
 
     override fun precioKm(envio: Envio): Int {
-        var precio :Int
+        val precio :Int
         if (envio.peso() <= 1500 ){
             precio = 2000
         }
@@ -112,7 +109,7 @@ class Avion(): Transporte() {
     }
 }
 
-class Barco(): Transporte() {
+class Barco: Transporte() {
     override val pesoMaximo = 100000
     override val volumen = 50000
     override val llevaArticulosPeligroso = true
@@ -120,7 +117,7 @@ class Barco(): Transporte() {
     override val tipoDesplazamiento = Regional
 
     override fun precioKm(envio: Envio): Int{
-        var precio :Int
+        val precio :Int
         if (envio.peso() <= 1500){
             precio = 200
         }
