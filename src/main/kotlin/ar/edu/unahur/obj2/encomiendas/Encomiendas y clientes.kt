@@ -20,7 +20,7 @@ object GestorEncomiendas {
     }
 
     fun tiempoDeEnvio(envio: Envio, transporte: Transporte): Int {
-        return (envio.sucursalOrigen.distanciaTierra(envio.sucursalDestino) / transporte.velocidadPromedio).roundToInt()
+        return (this.distanciaDelEnvio(envio) / transporte.velocidadPromedio).roundToInt()
     }
 
     fun registrarEnvio(envio: Envio) {
