@@ -4,7 +4,7 @@ import kotlin.math.*
 
 class Sucursal(val zona: Zona, val volumenDelDeposito: Int) {
     val posicion: MutableList<Int> = mutableListOf()
-    val transportes = mutableListOf<Transporte>()
+    var transportes = mutableListOf<Transporte>()
     val enviosRegistrados: MutableList<Envio> = mutableListOf()
     val articulosEnDeposito: MutableList<Articulo> = mutableListOf()
     val articulosEnViaje: MutableList<Articulo> = mutableListOf()
@@ -61,4 +61,7 @@ object Continental: Zona {
 }
 
 object Insular: Zona {
+}
+object Regional : Zona{
+
 }

@@ -17,9 +17,11 @@ abstract class Transporte() {
                 this.volumen > (this.carga.sumBy { article -> article.volumen } * 1.05))
     }
 
+    fun sirvePara(envio: Envio) = this.tipoDesplazamiento == envio.sucursalDestino.zona || this.tipoDesplazamiento == Regional
+
     fun esEnvioCoherente(envio: Envio): Boolean {
-        val coincidenRegiones = if (envio.sucursalOrigen.zona == envio.sucursalDestino.zona) envio.sucursalOrigen.zona == this.tipoDesplazamiento else false
-        return coincidenRegiones && envio.articulos.all { article -> this.coincideDestino(article) }
+
+        return this.sirvePara(envio) && envio.articulos.all { article -> this.coincideDestino(article) }
     }
 
     fun esTransporteApto(envio: Envio): Boolean {
@@ -61,7 +63,7 @@ class Camion(override val volumen: Int): Transporte() {
 
     override fun precioKm(envio: Envio) = 300
 
-    override fun maximoDeArticulosPeligrosos(envio: Envio): Boolean = false
+    override fun maximoDeArticulosPeligrosos(envio: Envio): Boolean = true
 
     fun desgastePorKilometraje() = kilometraje / 100
 }
@@ -74,7 +76,7 @@ class Moto(override val pesoMaximo: Int): Transporte() {
 
     fun viajeMaximo() = 400
 
-    override fun maximoDeArticulosPeligrosos(envio: Envio): Boolean = true
+    override fun maximoDeArticulosPeligrosos(envio: Envio): Boolean = false
 
     override fun precioKm(envio: Envio): Int{
         var total = 0
@@ -94,7 +96,7 @@ class Avion(): Transporte() {
     override val volumen = 5000
     override val llevaArticulosPeligroso = true
     override val velocidadPromedio = 700
-    override val tipoDesplazamiento = Insular
+    override val tipoDesplazamiento = Regional
 
     override fun precioKm(envio: Envio): Int {
         var precio :Int
@@ -115,7 +117,7 @@ class Barco(): Transporte() {
     override val volumen = 50000
     override val llevaArticulosPeligroso = true
     override val velocidadPromedio = 60
-    override val tipoDesplazamiento = Insular
+    override val tipoDesplazamiento = Regional
 
     override fun precioKm(envio: Envio): Int{
         var precio :Int

@@ -8,5 +8,7 @@ class Envio(val cliente: Cliente, val articulos: List<Articulo>, val sucursalOri
         return (transporteDesignado != null) && sucursalDestino.hayEspacio(articulos)
     }
 
+
+
     fun peso() = articulos.sumOf { it.peso }
 }
