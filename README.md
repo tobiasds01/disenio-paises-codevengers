@@ -1,191 +1,177 @@
-# Encomiendas Ya!
+# Países impostores
 
-![Envias Ya! cover](assets/logistica.jpg)
+![Portada](assets/portada.jpg)
 
 ## Antes de empezar: algunos consejos
 
 El enunciado tiene **mucha** información, van a necesitar leerlo varias veces. La sugerencia es que lo lean entero una vez (para tener una idea general) y luego vuelvan a consultarlo las veces que hagan falta.
 
-En otras palabras: trabajen completando cada sección antes de pasar a la siguiente, con los tests que aseguran que funciona incluidos. Si al avanzar en las secciones les parece necesario refactorizar, adelante, van a tener los tests que garantizan que no rompieron nada. :smirk:
+Concentrensé en los requerimientos y, excepto que se traben mucho, respeten el orden sugerido. No es necesario que hagan TDD, pero sí sería interesante que vayan creando las distintas clases y métodos a medida que resuelven cada requerimiento y no antes. 
 
-## El negocio
+En otras palabras: trabajen completando cada requerimiento antes de pasar al siguiente, con los tests que aseguran que funciona incluidos. Si al avanzar en los requerimientos les parece necesario refactorizar, adelante, van a tener los tests que garantizan que no rompieron nada. :smirk: 
 
-EncomiendasYa es una empresa líder en envíos a través de todo el país. Posee
-sucursales en todo el territorio, incluyendo la Antártida e Islas del Atlántico Sur. Estos envíos se realizan mediante distintos medios de transporte, tanto aéreos como terrestres (cada uno con sus particularidades). EncomiendasYa se acerco a la facultad porque necesita herramientas fiables para el cálculo del costo de los envíos, historial de clientes y rastreo de envíos.
+## Descripción del dominio
 
-## 1. Las Encomiendas
+Desde un observatorio de políticas públicas mundiales nos piden desarrollar un sistema para realizar estadísticas sobre distintos países del mundo. Según detallaron, de cada país les interesaría saber:
 
-El objetivo es desarrollar un modelo que permita registrar los envíos que maneja
-EncomiendasYa y el movimiento de sus transportes, pudiendo obtener información relevante
-para manejar el día a día de la organización.
+* su nombre,
+* su código ISO-3 (llamado en realidad [ISO 3166-1 alfa-3](https://es.wikipedia.org/wiki/ISO_3166-1)),
+* su población,
+* su superficie,
+* en qué continente está ubicado,
+* el código de la moneda local ([ISO 4217](https://es.wikipedia.org/wiki/ISO_4217)),
+* la cotización del dólar en la moneda local,
+* la lista de países con los que limita,
+* la lista de bloques regionales en los que participa,
+* la lista de idiomas oficiales que reconoce.
 
-Cada envío se genera cuando un cliente se presenta en una sucursal con los artículos que
-desea enviar, indicando la sucursal de destino.
+Por simplicidad, manejaremos al continente, los bloques regionales y los idiomas como `String`. Por ejemplo, podríamos representar a Bolivia con los siguientes datos:
 
-Cuando el envío llega a la sucursal destino, alguien designado por el cliente que hizo el
-envío lo pasa a retirar.
-
-La ubicación de cada sucursal está representada por un lugar, del que se conocen las
-coordenadas en la forma de una posición (X,Y), y en qué tipo de region del pais está, continental o insular. Por ejemplo, Córdoba, Jujuy son de tipo "continental", Malvinas, Ushuaia y la Base Marambio están una región "insular".
-
-La distancia entre 2 lugares se mide en kilómetros.
-
-Para calcular la distancia entre 2 lugares se pueden usar las siguientes ecuaciones:
-puntoA = (X1, Y1) , puntoB = (X2, Y2)
-
-- distanciaTierra(puntoA,puntoB) = | X1 – X2 | + | Y1 – Y2 |
-- distanciaDirecta(puntoA,puntoB) = √((X1-X2)2 + (Y1-Y2)2)
-
-Hay artículos peligrosos y artículos no peligrosos. De todos se conoce su peso, largo,
-ancho, alto y nombre.
-
-A su vez, las sucursales tienen un conjunto de vehículos disponibles para realizar los transportes.
-
-## 2. El viaje
-
-Con los datos del cliente, los artículos a ser enviados, la sucursal de destino y la sucursal
-donde se presenta el cliente (sucursal origen), se crea lo que en EncomiendasYa llaman
-envío. Previamente se chequea si puede ser realizado.
-
-Para que un envío se pueda realizar se debe cumplir que haya en la “sucursal origen” al
-menos un transporte capaz de llevar el envío hasta la ubicación de la “sucursal destino”.
-
-* Cada envío se asigna a algún transporte que está en la sucursal origen, que pueda
-enviarlo.
-* Para que un transporte pueda llevar un envío debe poder soportar el peso del
-mismo (o sea, que su peso máximo sea mayor que el peso del envío + el peso de
-los envíos que ya tiene asignados).
-* También debe tener un volumen suficiente para el envío (análogo al peso)
-* Todos los destinos de sus envíos deben tener la misma sucursal destino (es decir,
-un transporte va a una única sucursal destino).
-* La sucursal de destino debe poseer espacio físico para poder recibir el envío. Cada
-sucursal posee un deposito (alto, ancho y profundidad) el cual podrá tener envíos
-en espera para ser retirados. El espacio disponible será el volumen total menos la
-cantidad de envíos que estén en la sucursal y menos los envíos que están viajando
-hacia la sucursal.
-
-Además, hay limitaciones específicas para algunos transportes, según lo que se indica más
-abajo:
-
-El peso de un envío es la suma del peso de los artículos que lo componen.
-
-El volumen de un envío es la suma de los volúmenes de sus artículos más un porcentaje
-de corrección de volumen del 5%.
-
-## 3. Transportes
-
-En algún momento, el transporte parte hacia la sucursal destino de los envíos que tiene
-asignados. Nos interesa saber el kilometraje de todos los transportes, que aumenta según
-los kilómetros recorridos llevando envíos.
-
-EncomiendasYa usa transportes de estos tipos:
-
-* Camión
-  - El volumen se indica en forma particular para cada camión.
-  - Velocidad promedio: 90km/h
-  - Su peso máximo está determinado por el kilometraje.
-  - desgastePorKilometraje = kilometraje / 100
-  - Su peso máximo es 3000 Kg. – desgastePorKilometraje pero nunca es menor a 500 kg
-  - Sólo se desplaza en la region continental.
-  - Puede llevar artículos peligrosos.
-  - Precio: $300/km
-
-* Moto
-  - Volumen fijo 1 m3
-  - Su peso máximo está especificado para cada moto
-  - No pueden hacer viajes de más de 400 km.
-  - No puede salir de la continental ni llevar envíos peligrosos.
-  - Velocidad promedio: 110km/h
-  - Precio: El valor por kilómetro depende del peso según la cuenta kilos*80 $/km, pero se tomará como mínimo un valor de 500 $/km.
-  - Esto teniendo en cuenta los kilos de cada envío en particular, no importa qué otros envíos pueda tener cargada la moto.
-
-* Avión
-  - Pueden viajar entre regiones.
-  - Puede llevar artículos peligrosos, tienen un peso máximo de 10000 kg pero por ley no pueden llevar más de 10 artículos peligrosos juntos.
-  - Su volumen máximo es 5000 m3
-  - Velocidad promedio: 700km/h
-  - Precio: $2000 por km para envíos de hasta 1500 kg, $2500 por km para envíos de más de 1500 kg.
-  - Si bien técnicamente el avión no llega a la “sucursal destino” el costo del posterior traslado a la sucursal se considera despreciable.
-
-* Barco
-        Pueden viajar entre regiones.
-        Puede llevar artículos peligrosos, tienen un peso máximo de 100000 kg pero por
-        ley no pueden llevar más de 100 artículos peligrosos juntos.
-        Su volumen máximo es 50000 m3
-        Velocidad promedio: 60km/h
-        Precio: $200 por km para envíos de hasta 1500 kg, $250 por km para envíos de
-        más de 1500 kg.
-        Si bien técnicamente tampoco llega a la “sucursal destino” el costo del posterior traslado a la sucursal también se considera despreciable.
-
-Las velocidades no pueden cambiar, son fijas. 
-
-## Tipos de encomienda
-
-Algunas encomienda son más urgentes que otras por lo que EncomiendasYa ofrece 3 alternativas
-
-- **Encomienda estándar**. Llega cuando llega. 
-- **Encomienda prioritaria**. El cliente puede definir el tiempo máximo que puede tardar. Se le recarga un 50% del costo del envío.
+```kotlin
+nombre: "Bolivia"
+codigoIso3: "BOL"
+poblacion: 10985059
+superficie: 1098581.0
+continente: "América"
+codigoMoneda: "BOB"
+cotizacionDolar: 6.89
+// Notar que estos son objetos, no strings
+paisesLimitrofes: [argentina, brasil, chile, paraguay, peru]  
+bloquesRegionales: ["UNASUR"]
+idiomasOficiales: ["Español", "Quechua", "Aymara"]
+```
 
 ## Requerimientos
 
-1. Saber, para un transporte, cuál sería el costo de llevar un envío desde la sucursal de
-origen hasta la sucursal de destino del mismo, y cuántas horas tardaría en llevarlo.  
-2. Saber si un transporte puede llevar o no un envío, dados los requisitos de peso,
-volumen, manejo de artículos peligrosos, capacidad de llegar del origen al destino (por
-distancia y por la eventual necesidad de cruzar continentes), coherencia en los envíos
-que se cargan al mismo transporte (deben dirigirse todos a la misma sucursal), y las
-condiciones particulares de los envíos no standard (luxe, relajados e intimistas).
-Misma aclaración que para el punto 1.  
-3. Saber, para una sucursal, cuáles de los transportes que están en esa sucursal pueden
-llevar un determinado envío.  
-4. Registrar el ingreso de un nuevo envío en la sucursal origen, indicando: cliente,
-artículos a incluir, sucursal destino, y persona que retirará el envío en la sucursal
-destino.  
-En el momento de registrarse, el envío se asigna al transporte que, dentro de los
-vehículos que están en la sucursal origen y pueden llevar el envío, tenga el menor
-costo para el envío.  
+Dividimos los requerimientos en varias etapas distintas, cuyo orden debe ser respetado. El ejercicio está planteado de esta manera para que el diseño les quede más prolijo y desacoplado.
 
-## Casos de prueba
+### Etapa 1 - Calentando motores
 
-Los siguientes obligatorios casos de prueba sirven para empezar a guiar los tests del
-sistema. Bajo ningún concepto testean todas las posibilidades ni todos los casos de uso.
+Modelar los países con los atributos mencionados y resolver los siguientes requerimientos.
 
-Se deben agregar entonces los casos de prueba que falten para poder testear los casos de
-uso faltantes y aquellos que sean particulares del diseño.
-Configuraciones generales para todos los tests:
+#### Para un país:
 
-Se poseen 3 sucursales, una en William Morris, una en Rosario y otra en Base Marambio (en
-Antártida, insular).
+1. Indicar si **es plurinacional**. En una mega-simplificación de este concepto, diremos que un país es plurinacional si tiene más de un idioma oficial.
+1. Saber si **es una isla**, lo cual es cierto si no tiene ningún país limítrofe.
+1. Calcular su **densidad poblacional**, la cual se obtiene dividiendo a la población por la superficie. Para no tener problemas en etapas posteriores, redondeen este número de forma tal que devuelva un entero (pueden usar `roundToInt()` para eso).
+1. Conocer al **vecino más poblado**, que sería el país con mayor población dentro de la vecindad, que incluye tanto a los limítrofes como al país que consulta. Por ejemplo: asumiendo que Brasil es el país más poblado de su vecindad, tanto `brasil.vecinoMasPoblado()` como `peru.vecinoMasPoblado()` nos deberían dar como resultado `brasil`.
 
-- En la sucursal de William Morris exísten los siguientes vehículos: 1 Camión y 1 Avión
-- En la sucursal de Rosario exísten los siguientes vehículos: 2 Camión, 1 Barco y 1 Moto
-- En la sucursal de Base Marambio, Antártida exísten los siguientes vehículos: 2 Aviones, 1 Barco y 1 Camión
+#### Para dos países en particular:
 
-Todos los transportes están sin envíos asignados.
+1. Poder consultar si **son limítrofes**.
+1. Saber si **necesitan traducción** para poder dialogar. Esto ocurre si no comparten ninguno de sus idiomas oficiales.
+1. Conocer si **son potenciales aliados**. Esto es así cuando no necesitan traducción y además comparten algún bloque regional.
+1. Saber si **conviene ir de compras** de uno al otro, lo cual diremos que es verdadero cuando la cotización del dólar en el país de destino es mayor. Por ejemplo, si en Argentina la cotización es de `190` y en Bolivia de `6.89`, **no** conviene ir de Argentina a Bolivia pero **sí** al revés.
+1. Conocer **a cuánto equivale** un determinado monto en la moneda local, transformado en la moneda del país de destino. Como la referencia que estamos tomando es el precio del dólar, la equivalencia se haría convirtiendo primero a dólar y luego a la moneda de destino.
 
-### Caso 1
-    **Condiciones previas**: En la sucursal Morris esta cargado un envío en el avión para ir
-    a Marambio y un envío en el Camión para ir a Rosario.
-    **Caso de prueba**: Se piden los transportes disponibles en la sucursal de Morris para
-    un envío nuevo que tenga como destino a Rosario.
-    **Resultados**: Se debe obtener sólo al Camión como transporte disponible
+> :bulb: **Ayuda:** a estas consultas conviene modelarlas con métodos del `Pais` que reciban al segundo país por parámetro. Por ejemplo: `peru.esLimitrofeDe(honduras)`.
 
+### Etapa 2 - Observatorio
 
-### Caso 2
+Crear al Observatorio, que es un objeto que conoce a todos los países y debe poder responder las consultas que se enuncian a continuación. 
 
-    **Condiciones previas**: Se crea un envío con 12 artículos peligrosos.
-    **Caso de prueba**: Se piden los transportes disponibles para dicho envío en la sucursal de Morris.
-    **Resultados**: Se debe obtener sólo al Camión como transporte disponible
+Para dos países en particular, **cuyos nombres** se envían por parámetro, se pide poder resolver las mismas consultas de la etapa anterior:
 
-### Caso 3
+1. Poder consultar si **son limítrofes**.
+1. Saber si **necesitan traducción** para poder dialogar
+1. Conocer si **son potenciales aliados**.
+1. Saber si **conviene ir de compras**.
+1. Conocer **a cuánto equivale** un determinado monto en la moneda local, transformado en la moneda del país de destino.
 
-    **Condiciones previas**: Se carga a un avión de la sucursal Marambio un envío con un artículo de 1500 m³ y otro de 1700 m³ y destino Rosario.
-    **Caso de prueba**: Se crea un envío con un artículo de 2000 m³ y se piden los transportes disponibles en la sucursal de Marambio.
-    **Resultados**: Se debería obtener solamente al segundo avión o al barco como disponible.
+Ojo, que se pide (a propósito) que los parámetros sean **los nombres** de los países y no los objetos que los representan - de hecho es lo único que cambia entre esta etapa y la anterior. Para este punto puede resultar un poco molesto, pero nos va a facilitar la etapa siguiente.
+
+Sobre el conjunto de **todos los países**:
+
+4. Obtener los códigos ISO de los 5 países con mayor densidad poblacional.
+5. Indicar el nombre del continente con más paises plurinacionales.
+6. Conocer el promedio de densidad poblacional de los países insulares (o sea, aquellos países que son islas).
+
+### Etapa 3 - Conectando con el mundo real
+
+#### RestCountriesAPI - info de los países
+
+Queremos ahora modificar al Observatorio para que pueda resolver todos los requerimientos anteriores, pero esta vez interactuando con la [API RestCountries](http://restcountries.eu/). Esta [API](https://es.wikipedia.org/wiki/Interfaz_de_programaci%C3%B3n_de_aplicaciones) es un servicio gratuito que brinda información real sobre los países del mundo.
+
+Para facilitarles la interacción con dicho servicio y que no tengan que preocuparse por cuestiones propias de la interacción HTTP, les dejamos la clase `RestCountriesAPI`, que provee tres métodos para hacer consultas:
+
+```kotlin
+// Devuelve una lista con todos los países del mundo.
+todosLosPaises(): List<Country>
+
+// Devuelve todos los países cuyo nombre incluya el String que viene por parámetro. 
+// Ejemplo: si ponemos "guay" devolverá a Paraguay y Uruguay, 
+// pero si ponemos "uruguay" devolverá solo a este último.
+buscarPaisesPorNombre(nombre: String): List<Country>
+
+// Devuelve al país cuyo código ISO 3 coincide con el parámetro. 
+// Arroja un error si no existe ningún país con ese código.
+paisConCodigo(codigoIso3: String): Country
+```
+
+Nótese que los objetos que devuelve esta clase son de tipo `Country`, y que probablemente tengan una estructura diferente a los que ustedes crearon en la etapa anterior. Para no tener que tirar todo el código del `Observatorio`, conviene crear un objeto que oficie de _transformador_ entre el `Country` que devuelve la API y el `Pais` que ustedes crearon.
+
+**⚠️ Importante:** hay algunos atributos cuyos valores **no vienen** para todos los países, y están marcados como anulables en la clase `Country`. Para no tener que modificar los objetos `Pais`, les dejamos algunas decisiones:
+1. Si la `capital` viene nula, usar el string `"No especificada"` como capital.
+2. Si el `area` viene nula, usar el mismo valor que tenga para `population` como area.
+3. Pueden asumir que ni `borders`, ni `regionalBlocs`, ni `currencies` van a ser nulas (pero sí pueden ser listas vacías).
+4. Si viene más de una `currencies`, utilicen la primera. Y si no viene ninguna, usen `USD` como código de moneda.
+
+> :bulb: **Ayuda:** como parte del pasaje de un `Country` a un `Pais`, van a tener que transformar los códigos de países limítrofes que devuelve la API en objetos Países. Para evitar que se genere un bucle infinito, les recomendamos _no transformar_ los países limítrofes de los limítrofes. 
+
+#### CurrencyConverterAPI - cotización
+
+Un pequeño detalle: la RestCountriesAPI devuelve el código de la moneda **pero no** su cotización. Para obtener la cotización, van a tener que utilizar la `CurrencyConverterAPI`, que también les dejamos en el proyecto. 
+
+Su interfaz es mucho más sencilla:
+
+```kotlin
+// Dado un código válido de moneda, devuelve la cotización del dólar para esa moneda.
+convertirDolarA(codigoMoneda: String): Double
+```
+
+:warning: Esta API necesita de una clave que puede [obtenerse aquí](https://free.currencyconverterapi.com/free-api-key), o pedile a tu docente que te facilite una.
+
+#### Requerimientos
+
+Se pide entonces:
+
+1. Hacer un objeto o clase que sepa cómo transformar un objeto `Country` a un objeto `Pais`. Este objeto va a necesitar conocer a ambas APIs, para poder hacer las consultas necesarias. Incluir los tests correspondientes.
+1. Modificar al Observatorio para que sus consultas interactúen con la API. Utilizando el adaptador que crearon en el requerimiento anterior, no deberían necesitar modificar mucho el código que ya tienen.
+1. En las consultas que buscan países por nombre, arrojar errores si:
+  * Se ingresa ambas veces al mismo país. Ejemplo: `observatorio.sonLimitrofes("Panamá", "Panamá")`.
+  * Alguno/s de los países ingresados no existe/n. Ejemplo: `observatorio.necesitanTraduccion("Venezuela", "Sarasa")`.
+  * Hay más de un país cuyo nombre coincida con el parámetro de búsqueda. Ejemplo: `observatorio.sonPotencialesAliados("mbia", "Cabo Verde")`.
+
+**:warning: Importante:** una vez que conecten al Observatorio con la `RestCountriesAPI`, se les van a romper los tests (porque los datos reales no van a ser los mismos que ustedes inventaron). Los arreglaremos en la etapa siguiente. 
+
+### Etapa 4 - API impostora
+
+Los tests de la etapa anterior tienen un gran problema - cada vez que los ejecutamos hacen varios llamados a la API. Esto, además de ser bastante más lento que un test "puro", tiene otras desventajas: no podemos correrlos sin acceso a internet, nos acopla fuertemente con un servicio externo, no podemos decidir sobre los datos, etc.
+
+Para solucionar esto, se pide modificar todos los tests que utilicen a las APIs, reemplazandolas por impostores implementados con [mockk](https://mockk.io/).
+
+### Etapa 5 - Usando la aplicación
+
+Llegó el momento de realmente conectar a nuestro programa con el mundo real, permitiendo que "cualquier persona" (que tenga una computadora, Kotlin y los conocimientos necesarios para ejecutarlo) pueda utilizarlo.
+
+Para ello, vamos a programar una pequeña CLI, _command line interface_ o _interfaz por línea de comandos_, que nos permita acceder a los requerimientos de las dos primeras etapas, trayendo la información de la RestCountries API. El diseño de la interfaz queda librado a su creatividad, siempre y cuando cumpla con los siguientes requerimientos:
+
+1. Deben poder realizarse todas las consultas de las dos primeras etapas, interactuando con la API real.
+1. En caso de que los datos que se ingresan sean erróneos, hay que mostrar algún mensaje amigable.
+1. Incluir al menos un test por cada opción que tenga el CLI, y alguno donde se muestre un error. Simular la interacción de usuario y la interacción con la RestCountriesAPI utilizando mockk. En otras palabras: ningún test debería traer datos de la API real, todos los datos de países que utilicen deben ser mockeados.
+
+A modo de ejemplo, les dejamos unos GIFs mostrando cómo podría ser la interacción:
+
+_Caso feliz :smiley:_
+![CLI](assets/cli.gif)
+
+_Error :cry:_
+![CLI error](assets/cli-error.gif)
+
 
 ## Licencia
-
-Esta obra fue "recortada" por [Miguel Carboni](https://github.com/miguelius) y publicada bajo una [Licencia Creative Commons Atribución-CompartirIgual 4.0 Internacional][cc-by-sa].
+  
+Esta obra fue elaborada por [Federico Aloi](https://github.com/faloi) y publicada bajo una [Licencia Creative Commons Atribución-CompartirIgual 4.0 Internacional][cc-by-sa].
 
 [![CC BY-SA 4.0][cc-by-sa-image]][cc-by-sa]
 
@@ -194,6 +180,6 @@ Esta obra fue "recortada" por [Miguel Carboni](https://github.com/miguelius) y p
 
 ### Créditos
 
-:memo: [Enunciado original - PlanetExpress](http://tadp.wdfiles.com/local--files/tp-200802/Enunciado%20Entrega%201) creado por el equipo de TADP UTN del año 2008 compuesto por: Sergio Magnacco, Deby Fortini, Nico Passerini, Fer Dodino, Guille Polito, [Leonardo Gassman](https://github.com/lgassman) y Alfredo Sanzo y compartido generosamente por los términos de la licencia [![CC BY-SA 3.0][cc-by-sa-image]][cc-by-sa].
+:memo: Inspirado levemente en un enunciado de [Carlos Lombardi](https://github.com/clombardi).
 
-:camera_flash: Imagen de portada por Foto de [Marcin Jozwiak](https://unsplash.com/es/@marcinjozwiak) en [Unsplash](https://unsplash.com/es/fotos/oh0DITWoHi4#:~:text=Marcin%20Jozwiak%20en-,Unsplash,-Want%20to%20launch).
+:camera_flash: Imagen de portada por <a href="https://unsplash.com/@gabrielrojas?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Gabriel Rojas</a> en <a href="https://unsplash.com/s/photos/banderas-uyuni?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>.
