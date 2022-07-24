@@ -9,8 +9,8 @@ interface Builder {
     fun setContinente(value: String)
     fun setCodigoMoneda(value: String)
     fun setCotizacionDelDolar(value: Double)
-    fun setPaisesLimitrofes(value: List<Pais>)
-    fun setBloquesRegionales(value: List<String>)
-    fun setIdiomasOficiales(value: List<String>)
+    fun setPaisesLimitrofes(value: MutableSet<Pais>)
+    fun setBloquesRegionales(value: MutableSet<String>)
+    fun setIdiomasOficiales(value: MutableSet<String>)
     fun getResult(): Pais
 }

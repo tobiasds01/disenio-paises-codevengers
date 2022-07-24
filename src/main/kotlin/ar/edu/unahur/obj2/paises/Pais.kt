@@ -10,9 +10,9 @@ class Pais(
     var continente: String = "",
     var codigoMoneda: String = "",
     var cotizacionDolar: Double? = null,
-    var paisesLimitrofes: List<Pais> = mutableListOf(),
-    var bloquesRegionales: List<String> = mutableListOf(),
-    var idiomasOficiales: List<String> = mutableListOf()) {
+    var paisesLimitrofes: MutableSet<Pais> = mutableSetOf(),
+    var bloquesRegionales: MutableSet<String> = mutableSetOf(),
+    var idiomasOficiales: MutableSet<String> = mutableSetOf()) {
 
     fun esPlurinacional(): Boolean {
         return idiomasOficiales.size > 1
@@ -36,11 +36,11 @@ class Pais(
     }
 
     fun necesitanTraduccion(pais: Pais): Boolean {
-        return !(idiomasOficiales.contains { pais.idiomasOficiales.forEach { it } })
+        return idiomasOficiales.intersect(pais.idiomasOficiales).isEmpty()
     }
 
     fun sonPotencialesAliados(pais: Pais): Boolean {
-        return !necesitanTraduccion(pais) && compartenBloqueRegional(pais)
+        return !this.necesitanTraduccion(pais) && this.compartenBloqueRegional(pais)
     }
 
     fun convieneIrDeCompras(pais: Pais): Boolean {
@@ -53,7 +53,7 @@ class Pais(
 
 
     fun compartenBloqueRegional(pais: Pais): Boolean {
-        return bloquesRegionales.contains { pais.bloquesRegionales.forEach { it } }
+        return bloquesRegionales.intersect(pais.bloquesRegionales).isNotEmpty()
     }
 
     fun monedaLocalADolar(valor: Double): Double {

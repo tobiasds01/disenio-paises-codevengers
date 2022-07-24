@@ -10,8 +10,8 @@ class PaisConcreteBuilder: Builder {
     override fun setContinente(value: String) { nuevoPais.continente = value }
     override fun setCodigoMoneda(value: String) { nuevoPais.codigoMoneda = value }
     override fun setCotizacionDelDolar(value: Double) { nuevoPais.cotizacionDolar = value }
-    override fun setPaisesLimitrofes(value: List<Pais>) { nuevoPais.paisesLimitrofes = value }
-    override fun setBloquesRegionales(value: List<String>) { nuevoPais.bloquesRegionales = value }
-    override fun setIdiomasOficiales(value: List<String>) { nuevoPais.idiomasOficiales = value }
+    override fun setPaisesLimitrofes(value: MutableSet<Pais>) { nuevoPais.paisesLimitrofes = value }
+    override fun setBloquesRegionales(value: MutableSet<String>) { nuevoPais.bloquesRegionales = value }
+    override fun setIdiomasOficiales(value: MutableSet<String>) { nuevoPais.idiomasOficiales = value }
     override fun getResult(): Pais = nuevoPais
 }
